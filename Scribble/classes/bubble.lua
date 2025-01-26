@@ -1,8 +1,12 @@
 local bubble = {}
 
-local screen = require("classes.screen")
+local dataLetters = require("data.letters")
+
 local random = math.random
 
+local transitionTime = 13000
+local transitionVarMin = 2000
+local transitionVarMax = 5000
 
 function bubble.new( parent, character, callbackSelect, callbackPop )
 
@@ -10,7 +14,7 @@ function bubble.new( parent, character, callbackSelect, callbackPop )
 	parent:insert( group )
 	group.letter = character or "?"
 
-	local xMin, xMax = -parent.width*0.5 + 120, parent.width*0.5 - 250
+	local xMin, xMax = -parent.width*0.5 + 120, parent.width*0.5 - 220
 
 	-- Randomly assign the starting position of the bubble
 	-- and the direction it will move/animate towards.
@@ -28,9 +32,18 @@ function bubble.new( parent, character, callbackSelect, callbackPop )
 	})
 	letter:setFillColor( 0 )
 
+	local value = display.newText({
+		parent = group,
+		text = dataLetters[group.letter].value,
+		x = shape.width*0.3 + 4,
+		y = -shape.height*0.3 - 4,
+		font = "assets/fonts/ff-comma-trial.regular.ttf",
+		fontSize = 16
+	})
+	value:setFillColor( 0 )
+	value.anchorX, value.anchorY = 0, 1
 
 	function group:animate()
-
 		-- Change the direction of the animation so that the bubbles
 		-- don't randomly retain their size, rotation and position.
 		group.direction = -group.direction
@@ -58,6 +71,8 @@ function bubble.new( parent, character, callbackSelect, callbackPop )
 
 			if isActive then
 				group.isActive = true
+				-- Reserve pop1 for selecting bubbles.
+				audio.play( "assets/audio/pop1.wav" )
 
 				shape:setFillColor( 0.5, 0.5, 1 )
 				letter:setFillColor( 0.5, 0.5, 1 )
@@ -80,7 +95,7 @@ function bubble.new( parent, character, callbackSelect, callbackPop )
 
 			transition.cancel( groupTransition )
 
-			audio.play( "assets/audio/pop" .. random(4) .. ".wav" )
+			audio.play( "assets/audio/pop" .. random(2,4) .. ".wav" )
 
 			-- Add pop image.
 			local pop = display.newImageRect( parent, "assets/images/pop" .. random(3) .. ".png", 120, 120 )
@@ -110,7 +125,7 @@ function bubble.new( parent, character, callbackSelect, callbackPop )
 		end
 	end
 
-	groupTransition = transition.to( group, { time = 15000 + random( 3000, 5000 ), y = group.y - parent.height - group.height, onComplete = group.pop } )
+	groupTransition = transition.to( group, { time = transitionTime + random( transitionVarMin, transitionVarMax ), y = group.y - parent.height - group.height, onComplete = group.pop } )
 		-- transition.to( group, { time = 1000, y = group.y+100, transition = easing.inQuad, onComplete = function()
 		-- 	group:destroy()
 		-- end } )
