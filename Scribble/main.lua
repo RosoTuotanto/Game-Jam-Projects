@@ -25,11 +25,11 @@ local launchParams = {
 	-- to game, toggles on loadsave's error reporting and loads performance meter.
 	debugMode = true,
 	-- Whether or not the project utilises persistent data via Spyric Loadsave.
-	usesSavedata = false,
+	usesSavedata = true,
 	-- Whether or not the project encodes and protects the save data or not.
-	protectSavedata = true,
+	protectSavedata = false,
 	-- Set master volume to zero.
-	muteGame = true,
+	-- muteGame = true,
 
 	-- launchScreen.lua contents and visual options:
 	logoFilename = "assets/images/launchScreen/XeduR.png",
@@ -40,7 +40,7 @@ local launchParams = {
 	logoAnchorX = 0.5,
 	logoAnchorY = 0.5,
 
-	text = "© 2022 Eetu Rantanen\nwww.xedur.com",
+	text = "© 2025 Eetu Rantanen\nwww.xedur.com",
 	font = native.systemFontBold,
 	fontSize = 24,
 	textAlign = "center",
@@ -108,7 +108,7 @@ require("classes.sfx")
 audio.loadSFX("assets/audio")
 ---------------------------------------------------------------------------
 
-if not launchParams.muteGame then
+if launchParams.muteGame then
 	audio.setVolume( 0 )
 end
 
