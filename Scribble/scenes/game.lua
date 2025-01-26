@@ -15,10 +15,13 @@ local title, instructions, startButton, buttonAudio, buttonRestart
 local timerBubble
 local highscore = 0
 local gameActive = false
+local currentWord = ""
 
 
 local container = display.newContainer( screen.width - 105, screen.height - 24 )
 container.x, container.y = screen.centerX, screen.centerY + 2
+
+local group
 
 -- local groupBubble = display.newGroup()
 local bubblePiece = {}
@@ -59,15 +62,59 @@ path, file = nil, nil -- luacheck: ignore
 ---------------------------------------------------------------------------
 
 -- Functions.
--- local function
+local function selectBubble( whichBubble )
+	-- print("selectBubble", whichBubble.letter )
+
+	currentWord = string.lower( currentWord .. whichBubble.letter )
+
+	print("currentWord", currentWord, wordList[currentWord] )
+
+	if wordList[currentWord] then
+		audio.play( "assets/audio/score.wav" )
+		currentWord = ""
+
+		local score = 0
+
+		for i = 1, #bubblePiece do
+			if bubblePiece[i] and bubblePiece[i].isActive then
+				bubblePiece[i]:pop()
+				score = score + dataLetters[bubblePiece[i].letter].value
+			end
+		end
+
+		print( score )
+
+	end
+
+
+end
+
+
+local function popBubble( whichBubble )
+	-- print("popBubble", whichBubble.letter )
+
+	if gameActive and whichBubble.isActive then
+		whichBubble.isActive = false
+		currentWord = ""
+
+		for i = 1, #bubblePiece do
+			if bubblePiece[i] and bubblePiece[i].isActive then
+				bubblePiece[i]:pop()
+			end
+		end
+	end
+end
+
 
 local function createBubble()
-	bubblePiece[#bubblePiece+1] = bubble.new( container, gameLetter[#bubblePiece+1] )
+	bubblePiece[#bubblePiece+1] = bubble.new( container, gameLetter[#bubblePiece+1], selectBubble, popBubble )
 end
 
 local function gameover()
 	if gameActive then
 		gameActive = false
+
+		buttonRestart.isVisible = false
 
 		timer.cancel( timerBubble )
 
@@ -83,7 +130,6 @@ local function gameover()
 			end
 
 			title.isVisible, instructions.isVisible, startButton.isVisible = true, true, true
-			buttonRestart.isVisible = false
 		end )
 	end
 end
@@ -101,7 +147,7 @@ local function startGame( event )
 		-- local lettersInGame = letterData
 		table.shuffle( gameLetter )
 
-		timerBubble = timer.performWithDelay( 750, createBubble, #gameLetter)
+		timerBubble = timer.performWithDelay( 500 + math.random( 500, 1500 ), createBubble, #gameLetter)
 	end
 end
 

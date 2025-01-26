@@ -4,7 +4,7 @@ local screen = require("classes.screen")
 local random = math.random
 
 
-function bubble.new( parent, character )
+function bubble.new( parent, character, callbackSelect, callbackPop )
 
 	local group = display.newGroup()
 	parent:insert( group )
@@ -17,8 +17,6 @@ function bubble.new( parent, character )
 	group.x, group.y = random( xMin, xMax ), parent.height*0.5 + 50
 	group.direction = random(1, 2) == 1 and -1 or 1
 	group.xStart = group.x
-
-	local isPopped = false
 
 	local shape = display.newImageRect( group, "assets/images/bubble" .. random(5) .. ".png", 64, 64 )
 
@@ -56,11 +54,15 @@ function bubble.new( parent, character )
 
 	function group:touch( event )
 		if event.phase == "began" then
-			group.isActive = not group.isActive
+			local isActive = not group.isActive
 
-			if group.isActive then
+			if isActive then
+				group.isActive = true
+
 				shape:setFillColor( 0.5, 0.5, 1 )
 				letter:setFillColor( 0.5, 0.5, 1 )
+
+				callbackSelect( self )
 			else
 				-- Bubble reactivated, just pop it.
 				group:pop()
@@ -73,8 +75,8 @@ function bubble.new( parent, character )
 	group:addEventListener( "touch", group )
 
 	function group:pop()
-		if not isPopped then
-			isPopped = true
+		if not group.isPopped then
+			group.isPopped = true
 
 			transition.cancel( groupTransition )
 
@@ -103,10 +105,12 @@ function bubble.new( parent, character )
 			transition.to( self, { time = 100, xScale=1.25, yScale=1.25, alpha=0.25, transition=easing.inBack, onComplete = function()
 				display.remove( self )
 			end } )
+
+			callbackPop( self )
 		end
 	end
 
-	groupTransition = transition.to( group, { time = 5000, y = group.y - parent.height - group.height, onComplete = group.pop } )
+	groupTransition = transition.to( group, { time = 15000 + random( 3000, 5000 ), y = group.y - parent.height - group.height, onComplete = group.pop } )
 		-- transition.to( group, { time = 1000, y = group.y+100, transition = easing.inQuad, onComplete = function()
 		-- 	group:destroy()
 		-- end } )
